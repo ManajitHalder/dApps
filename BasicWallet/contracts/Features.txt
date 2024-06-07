@@ -1,0 +1,65 @@
+
+
+Write a basic wallet with the following features:
+
+1. Only the owner of the contract can withdraw amount
+2. Only the owner of the cotract can send some ETH to other account
+3. Anyone can send ETH to the owner account
+4. Wallet maintains a list of account (name and address) it can send/receive ETH
+5. Only the owner can add new accounts to the wallet
+6. Only the owner can remove accounts from the wallet
+7. Only the owner can edit account details 
+8. Maintain transaction history
+9. Maintain a list of favourite accounts
+10. 
+
+Utility functions:
+1. get balance of the account
+2.
+ 
+Advanced features:
+1. Transaction History: Maintain a log of all transactions within the contract, including deposits, 
+    withdrawals, and transfers, for better transparency and auditing.
+
+2. Transaction Limits: Allow the owner to set transaction limits for transfers, 
+    ensuring that only authorized amounts can be transferred at once.
+
+3. Emergency Stop: Implement a feature that allows the owner to pause or disable certain functionalities 
+in case of emergencies or security concerns.
+
+4. Gas Optimization: Optimize contract functions to minimize gas costs for transactions, ensuring 
+efficient use of blockchain resources.
+
+5. Secure Withdrawal Patterns: Implement secure withdrawal patterns to prevent potential 
+vulnerabilities such as reentrancy attacks.
+
+6. Upgradeability: Design the contract with upgradability in mind, allowing for future 
+enhancements and bug fixes without disrupting existing functionalities.
+
+7. Error Handling: Implement robust error handling mechanisms to provide informative error 
+messages and prevent unexpected behavior.
+
+8. Fallback Function Enhancements: Enhance the fallback function to handle edge cases and 
+ensure seamless processing of incoming transactions.
+
+9. Gasless Transactions: Integrate meta-transaction support to enable gasless transactions for users, 
+allowing them to interact with the contract without needing Ether for gas fees.
+
+10. EIP-712 Support: Implement EIP-712 support for structured data hashing and signature verification, 
+enhancing security and usability for off-chain transactions.
+
+11. Address Whitelisting: Allow the owner to whitelist specific addresses for deposit and transfer 
+functionalities, adding an extra layer of access control.
+
+12. Time-Lock Functionality: Implement time-lock functionality for withdrawals, requiring a 
+specified waiting period before funds can be transferred out of the contract.
+
+13. Fallback Recovery Mechanism: Design a fallback recovery mechanism in case the owner loses 
+access to their account, ensuring funds can be safely retrieved by authorized parties.
+
+14. Gas Refund Mechanism: Implement a gas refund mechanism to reimburse users for unused gas in 
+failed transactions, improving user experience and cost efficiency.
+
+15. Compliance Features: Integrate compliance features to ensure regulatory compliance, such as KYC/AML 
+checks for deposit and withdrawal activities.
+
