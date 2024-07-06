@@ -29,12 +29,25 @@ contract BasicWallet {
     // Mapping to maintain list of account addresses with name of the person for more user-friendly access
     mapping(string => address) private addressList;
 
-    // event for withdrawl
-    event Withdraw(address indexed owner, uint256 amount);
+    // Transaction struct to represent an individual transaction. 
+    // Created to maintain log of all transactions within the contract, including
+    // deposit, withdraw, transfer, transferTo for better transparency and auditing.
+    struct Transaction {
+        address sender;
+        address recipient;
+        uint256 amount;
+        uint256 timestamp;
+    }
+
+    // Mapping to store transaction record
+    mapping(bytes32 => Transaction) public transactionRecord;
+
     // event for deposit
-    event Deposit(address indexed from, uint256 amount);
+    event Deposit(address indexed from, uint256 amount, uint256 timestamp);
+    // event for withdrawl
+    event Withdraw(address indexed owner, uint256 amount, uint256 timestamp);
     // event for transfer
-    event Transfer(address indexed from, address indexed to, uint256 amount);
+    event Transfer(address indexed from, address indexed to, uint256 amount, uint256 timestamp);
 
     // Modifier to restrict access only to owner
     modifier onlyOwner() {
@@ -48,26 +61,34 @@ contract BasicWallet {
 
     // Fallback function to receive ETH
     receive() external payable {
-        emit Deposit(msg.sender, msg.value);
+        emit Deposit(msg.sender, msg.value, block.timestamp);
     }
 
     // To receive ether from other contract/addresses
     function deposit() external payable returns (bool) {
         require(msg.value > 0, "Must send some ether");
-        emit Deposit(msg.sender, msg.value);
+
+        // Add a transaction record
+        bytes32 txId = keccak256(abi.encodePacked(msg.sender, block.timestamp));
+        transactionRecord[txId] = Transaction(msg.sender, address(this), msg.value, block.timestamp);
+
+        emit Deposit(msg.sender, msg.value, block.timestamp);
 
         return true;
     }
 
     // Withdraw function to withdraw ether by owner only
-    function withdraw() external onlyOwner {
-        uint256 balance = address(this).balance;
-        require(balance > 0, "Insufficient balance");
+    function withdraw(uint256 _amount) external onlyOwner {
+        require(address(this).balance >= _amount, "Insufficient balance");
 
-        (bool success, ) = owner.call{value: balance}("");
+        (bool success, ) = owner.call{value: _amount}("");
         require(success, "Transfer failed");
 
-        emit Withdraw(owner, balance);
+        // Add a transaction record
+        bytes32 txId = keccak256(abi.encodePacked(msg.sender, block.timestamp));
+        transactionRecord[txId] = Transaction(address(this), msg.sender, _amount, block.timestamp);
+
+        emit Withdraw(owner, _amount, block.timestamp);
     }
 
     // transfer amount to another account
@@ -76,7 +97,11 @@ contract BasicWallet {
         (bool success,) = _to.call{value: _amount}("");
         require(success, "Trasfer failed");
 
-        emit Transfer(address(this), _to, _amount);
+        // Add a transaction record
+        bytes32 txId = keccak256(abi.encodePacked(msg.sender, block.timestamp));
+        transactionRecord[txId] = Transaction(address(this), _to, _amount, block.timestamp);
+
+        emit Transfer(address(this), _to, _amount, block.timestamp);
 
         return success;
     }
@@ -89,7 +114,11 @@ contract BasicWallet {
         (bool success, ) = to.call{value: _amount}("");
         require(success, "Transfer to address from addressList failed");
 
-        emit Transfer(address(this), to, _amount);
+        // Add a transaction record
+        bytes32 txId = keccak256(abi.encodePacked(msg.sender, block.timestamp));
+        transactionRecord[txId] = Transaction(address(this), to, _amount, block.timestamp);
+
+        emit Transfer(address(this), to, _amount, block.timestamp);
 
         return success;
     }
@@ -126,5 +155,14 @@ contract BasicWallet {
     // Check balance of the contract
     function getBalance() external view returns (uint256) {
         return address(this).balance;
+    }
+
+    // Retrieve transaction details based on transaction ID
+    function retrieveTransaction(bytes32 _txId) external view returns (address, address, uint256, uint256) {
+        Transaction memory txDetails = transactionRecord[_txId];
+        // Check whether transaction with this ID is present or not in the list.
+        require(txDetails.sender != address(0), "Transaction not found"); 
+        
+        return (txDetails.sender, txDetails.recipient, txDetails.amount, txDetails.timestamp);
     }
 }
